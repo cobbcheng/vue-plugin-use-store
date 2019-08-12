@@ -36,7 +36,7 @@ export const useStore: useStore<any[]> = function (
   }
 
   if (!hasRegister(module.state)) {
-    targetState(module.state, name)
+    targetModule(module.state, name)
     store.registerModule(name, module)
   }
 
@@ -75,7 +75,7 @@ function get (obj: Objtype, path: string): any {
   }
 }
 
-function targetState (state: object, name: string): void {
+function targetModule (state: object, name: string): void {
   Object.defineProperty(state, REG_TARGET, {
     value: name,
     writable: false,
