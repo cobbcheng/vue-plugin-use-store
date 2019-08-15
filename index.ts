@@ -24,18 +24,19 @@ export const useStore: useStore<any[]> = function (
 ) {
   const store = storeConf.store
   const regID = get(module, `state.${REG_TARGET}`)
+  const regState = hasRegister(name, store)
 
   if (!store) {
     errLog('this plugin has not installed, please check it.')
     return [{}, () => {}]
   }
 
-  if (hasRegister(module.state) && regID !== name) {
+  if (regState && regID !== name) {
     errLog(`the module has registered, named ${regID}, please check it`)
     return [{}, () => {}]
   }
 
-  if (!hasRegister(module.state)) {
+  if (!regState) {
     targetModule(module.state, name)
     store.registerModule(name, module)
   }
@@ -60,9 +61,11 @@ function errLog (desc: string) {
 }
 
 function hasRegister (
-  state: any
+  name: string,
+  store: any
 ): boolean {
-  return Boolean(state[REG_TARGET])
+  const module = store.state[name]
+  return isPlainObject(module) && Object.keys(module).length > 0
 }
 
 function get (obj: Objtype, path: string): any {
@@ -83,3 +86,10 @@ function targetModule (state: object, name: string): void {
     enumerable: false
   })
 }
+
+const _toString = Object.prototype.toString
+
+function isPlainObject (obj: any): boolean {
+  return _toString.call(obj) === '[object Object]'
+}
+

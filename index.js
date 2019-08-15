@@ -5,16 +5,17 @@ var storeConf = {};
 exports.useStore = function (name, module) {
     var store = storeConf.store;
     var regID = get(module, "state." + REG_TARGET);
+    var regState = hasRegister(name, store);
     if (!store) {
         errLog('this plugin has not installed, please check it.');
         return [{}, function () { }];
     }
-    if (hasRegister(module.state) && regID !== name) {
+    if (regState && regID !== name) {
         errLog("the module has registered, named " + regID + ", please check it");
         return [{}, function () { }];
     }
-    if (!hasRegister(module.state)) {
-        targetState(module.state, name);
+    if (!regState) {
+        targetModule(module.state, name);
         store.registerModule(name, module);
     }
     var state = store.state[name];
@@ -32,8 +33,9 @@ exports.useStorePlugin = function (store) {
 function errLog(desc) {
     throw new Error("[vue-plugin-use-store] " + desc);
 }
-function hasRegister(state) {
-    return Boolean(state[REG_TARGET]);
+function hasRegister(name, store) {
+    var module = store.state[name];
+    return isPlainObject(module) && Object.keys(module).length > 0;
 }
 function get(obj, path) {
     if (obj.hasOwnProperty(path)) {
@@ -45,11 +47,15 @@ function get(obj, path) {
         }, obj);
     }
 }
-function targetState(state, name) {
+function targetModule(state, name) {
     Object.defineProperty(state, REG_TARGET, {
         value: name,
         writable: false,
         configurable: false,
         enumerable: false
     });
+}
+var _toString = Object.prototype.toString;
+function isPlainObject(obj) {
+    return _toString.call(obj) === '[object Object]';
 }
