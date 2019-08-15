@@ -92,4 +92,3 @@ const _toString = Object.prototype.toString
 function isPlainObject (obj: any): boolean {
   return _toString.call(obj) === '[object Object]'
 }
-
